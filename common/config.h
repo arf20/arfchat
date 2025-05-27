@@ -24,4 +24,7 @@
 
 #define MAGIC   0x42069cac
 
+
+#define WS_PORT 42070
+
 #endif /* _CONFIG_H */

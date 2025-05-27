@@ -5,8 +5,13 @@ project(arfchat)
 file(GLOB COMMON_SRC "common/*.c")
 file(GLOB CLIENT_SRC "arfchat/src/*.c")
 file(GLOB DAEMON_SRC "arfchatd/src/*.c")
+file(GLOB WS_SRC "arfchat-ws/src/*.c")
 
 include_directories("common/")
 
 add_executable(arfchat ${COMMON_SRC} ${CLIENT_SRC})
 add_executable(arfchatd ${COMMON_SRC} ${DAEMON_SRC})
+add_executable(arfchat-ws ${COMMON_SRC} ${WS_SRC})
+
+target_link_libraries(arfchat-ws websockets cap)
+
