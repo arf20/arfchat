@@ -30,8 +30,8 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "net.h"
-#include "db.h"
+#include "common/db.h"
+#include "libarfchat/include/arfchat.h"
 
 
 struct termios saved_tattr = { };
@@ -116,8 +116,8 @@ main(int argc, char **argv)
         printf("==uid: %d\n==nick: %s\n", uid, nick);
 
     /* Init */
-    if (create_sockets(relay_server) < 0) {
-        printf("create_sockets: %s\n", strerror(errno));
+    if (arfchat_init(relay_server) < 0) {
+        printf("arfchat_init: %s\n", strerror(errno));
         return 1;
     }
 
@@ -145,11 +145,11 @@ main(int argc, char **argv)
     fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
     int run = 1;
-    const header_t *header;
+    const arf_header_t *header;
     const char *data;
     struct sockaddr_in s_addr;
     while (run) {
-        if (recv_message(&header, &data, &s_addr) < 0) {
+        if (arfchat_recv_raw(&header, &data, &s_addr) < 0) {
             if (errno != EAGAIN) {
                 printf("recv_message: %s\n", strerror(errno));
                 break;
@@ -338,7 +338,7 @@ main(int argc, char **argv)
 
 
     /* Deinit */
-    destroy_sockets();
+    arfchat_destroy();
 
     for (user_node_t *i = user_list->next; i != NULL;) {
         user_node_t *t = i->next;

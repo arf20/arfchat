@@ -19,12 +19,14 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define PORT    42069
-#define GROUP   "239.255.42.69"
+#define ARF_BUFF_SIZE   8192
 
-#define MAGIC   0x42069cac
+#define ARF_PORT        42069
+#define ARF_GROUP       "239.255.42.69"
+
+#define ARF_MAGIC       0x42069cac
 
 
-#define WS_PORT 42070
+#define ARF_WS_PORT     42070
 
 #endif /* _CONFIG_H */

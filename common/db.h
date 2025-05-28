@@ -47,9 +47,11 @@ void user_list_set_rid(user_node_t *l, uint32_t uid, uint16_t rid);
 const char *user_list_get_nick(user_node_t *l, uint32_t uid);
 uint16_t user_list_get_rid(user_node_t *l, uint32_t uid);
 void user_list_remove(user_node_t *l, uint32_t uid);
+void user_list_destroy(user_node_t *l);
 
 void room_list_push(room_node_t *l, uint16_t rid, const char *rname);
 const char *room_list_get_rname(room_node_t *l, uint16_t rid);
 void room_list_clean_empty(room_node_t *rl, user_node_t *ul);
+void room_list_destroy(room_node_t *l);
 
 #endif /* _DB_H */

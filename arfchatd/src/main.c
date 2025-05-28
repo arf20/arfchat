@@ -30,31 +30,9 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "net.h"
-#include "db.h"
+#include "libarfchat/include/arfchat.h"
+#include "common/db.h"
 
-
-struct termios saved_tattr = { };
-
-void
-prompt_input(char *buff, size_t n)
-{
-    char c;
-    int i = 0;
-    while ((c = getchar()) != '\n' && i < n - 2) {
-        if (c == -1) continue;
-        if (c == 127) {
-            i--;
-            printf("\b \b");
-            continue;
-        }
-        putchar(c);
-        buff[i] = c;
-        i++;
-    }
-    buff[i] = '\0';
-    putchar('\n');
-}
 
 int
 main(int argc, char **argv)
@@ -76,7 +54,7 @@ main(int argc, char **argv)
     room_list->next = NULL;
 
     /* Init */
-    if (create_sockets() < 0) {
+    if (arfchat_init(NULL) < 0) {
         printf("create_sockets: %s\n", strerror(errno));
         return 1;
     }
@@ -84,14 +62,14 @@ main(int argc, char **argv)
     time_t t_begin = time(NULL);
 
     int run = 1;
-    const header_t *header;
+    const arf_header_t *header;
     const char *data;
     struct sockaddr_in s_addr;
     int size = 0;
     while (run) {
-        if ((size = recv_message(&header, &data, &s_addr)) < 0) {
+        if ((size = arfchat_recv_raw(&header, &data, &s_addr)) < 0) {
             if (errno != EAGAIN) {
-                printf("recv_message: %s\n", strerror(errno));
+                printf("recv_arf_message: %s\n", strerror(errno));
                 break;
             }
         } else {
@@ -171,29 +149,15 @@ main(int argc, char **argv)
 
             /* Relay packet */
             for (user_node_t *i = user_list->next; i != NULL; i = i->next)
-                relay_packet(header, size, &i->addr);
+                arfchat_sendto_raw(header, size, &i->addr);
         }
     }
 
     /* Deinit */
-    destroy_sockets();
+    arfchat_destroy();
 
-    for (user_node_t *i = user_list->next; i != NULL;) {
-        user_node_t *t = i->next;
-        free(i->nick);
-        free(i->hname);
-        free(i);
-        i = t;
-    }
-    free(user_list);
-
-    for (room_node_t *i = room_list->next; i != NULL;) {
-        room_node_t *t = i->next;
-        free(i->rname);
-        free(i);
-        i = t;
-    }
-    free(room_list);
+    user_list_destroy(user_list); 
+    room_list_destroy(room_list); 
 
     return 0;
 }
