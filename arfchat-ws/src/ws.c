@@ -29,6 +29,10 @@ struct per_session_data {
 };
 
 
+struct lws_protocols *proto = NULL;
+struct lws_context *context = NULL;
+
+
 static int
 ws_service_callback(
     struct lws *wsi,
@@ -53,6 +57,7 @@ ws_service_callback(
     } else {
         /* relay message */
         printf("received %d from arfchat\n", recvsize);
+        lws_callback_on_writable_all_protocol(context, proto);
         lws_write(wsi, (char*)header, recvsize, LWS_WRITE_BINARY);
     }
 
@@ -103,11 +108,13 @@ ws_init()
         .uid =          -1
     };
 
-    struct lws_context *context = lws_create_context(&info);
+    context = lws_create_context(&info);
     if (context == NULL) {
         fprintf(stderr, "error lws_create_context\n");
         return NULL;
     }
+
+    proto = &protocols[0];
 
     return context;
 }
@@ -116,7 +123,7 @@ void
 ws_run(struct lws_context *context)
 {
     while (1) {
-        lws_service(context, 12);
+        lws_service(context, 1);
     }
 }
 

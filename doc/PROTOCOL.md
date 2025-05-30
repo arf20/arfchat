@@ -4,6 +4,8 @@ arf chat protocol
 
 ## Header
 
+Size: 12 bytes
+
 ```
   4 bytes
 +-------------------------------+

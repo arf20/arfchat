@@ -38,7 +38,7 @@ typedef enum {
 /**
  * Header structure
  */
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint32_t    _magic; /**< Magic fixed field */
     uint8_t     type;   /**< Message type @see arf_type_t */
     uint8_t     flags;  /**< Message flag bitfield */
