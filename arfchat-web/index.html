@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="https://arf20.com/style.css">
+        <title>ARFNET</title>
+        <style>
+.center-box {
+    border: 1px;
+    border-style: double;
+    width: 170px;
+    margin: auto;
+    padding: 30px;
+}
+        </style>
+    </head>
+
+    <body>
+        <header><a href="http://arf20.com">
+            <img src="http://arf20.com/arfnet_logo.png" width="64"><span class="title"><strong>ARFNET</strong></span>
+        </a></header>
+        <hr>
+        <main>
+            <h2 class="center">Chat</h2>
+            <p>Chat with ARFNET users</p>
+            <div id="username-box" class="center-box">
+                <h3>Join</h3>
+                <label for="username">Username</label><br>
+                <input type="text" id="username">
+                <button type="button">Set</button>
+            </div>
+            <div id="room-box" class="center-box">
+                <h3>Chatrooms</h3>
+                <label for="roomlist">Room</label><br>
+                <select id="roomlist" size="10">
+                    
+                </select><br>
+                <button type="button">Join</button>
+            </div>
+            <div id="chat-box" class="box">
+
+            </div>
+        </main>
+    </body>
+
+    <script>
+        document.getElementById("username-box").style.display = 'block';
+        document.getElementById("room-box").style.display = 'none';
+        document.getElementById("chat-box").style.display = 'none';
+
+
+        const socket = new WebSocket('ws://localhost:42070');
+        socket.binaryType = "arraybuffer";
+
+
+        socket.onopen = function(event) {
+            // Handle connection open
+        };
+
+        socket.onmessage = function(event) {
+            // Handle received message
+        };
+
+        socket.onclose = function(event) {
+            // Handle connection close
+        };
+
+        function sendMessage(message) {
+            socket.send(message);
+        }
+    </script>
+</html>
+

@@ -22,11 +22,17 @@
 
 #include "libarfchat/include/arfchat.h"
 #include "ws.h"
+#include "common/config.h"
 
 
 int
 main()
 {
+    printf("arfchat-ws  Copyright (C) 2024  Angel Ruiz Fernandez <arf20>\n"
+        "This program comes with ABSOLUTELY NO WARRANTY\n"
+        "This is free software, and you are welcome to redistribute it\n"
+        "under certain conditions.\n\n");
+
     /* Init */
     if (arfchat_init(NULL) < 0) {
         printf("arfchat_init: %s\n", strerror(errno));
@@ -39,6 +45,7 @@ main()
         return 1;
     }
 
+    printf("listening on %d\n", ARF_WS_PORT);
 
 
     ws_run(context);
