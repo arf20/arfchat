@@ -14,35 +14,17 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-    
-    main.c: Application entry point
 */
 
-#include <stdio.h>
+#ifndef _WS_H
+#define _WS_H
 
-#include "libarfchat/include/arfchat.h"
-#include "ws.h"
-
-
-int
-main()
-{
-    /* Init */
-    if (arfchat_init(NULL) < 0) {
-        printf("arfchat_init: %s\n", strerror(errno));
-        return 1;
-    }
-
-    struct lws_context *context = NULL;
-    if (!(context = ws_init())) {
-        printf("ws_init: %s\n", strerror(errno));
-        return 1;
-    }
+#include <libwebsockets.h>
 
 
+struct lws_context *ws_init();
 
-    ws_run(context);
+void ws_run(struct lws_context *context);
 
-    return 0;
-}
+#endif /* _WS_H */
 

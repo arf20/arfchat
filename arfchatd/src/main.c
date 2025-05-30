@@ -55,7 +55,7 @@ main(int argc, char **argv)
 
     /* Init */
     if (arfchat_init(NULL) < 0) {
-        printf("create_sockets: %s\n", strerror(errno));
+        printf("arfchat_init: %s\n", strerror(errno));
         return 1;
     }
 
@@ -69,7 +69,7 @@ main(int argc, char **argv)
     while (run) {
         if ((size = arfchat_recv_raw(&header, &data, &s_addr)) < 0) {
             if (errno != EAGAIN) {
-                printf("recv_arf_message: %s\n", strerror(errno));
+                printf("arfchat_recv_raw: %s\n", strerror(errno));
                 break;
             }
         } else {

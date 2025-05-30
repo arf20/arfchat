@@ -56,7 +56,7 @@ static char buff[ARF_BUFF_SIZE];
 /**
  * Multicast group destination for messages
  */
-static struct sockaddr_in dest_addr;
+static struct sockaddr_in group_addr;
 
 /**
  * Optional unicast relay server address
@@ -79,7 +79,7 @@ arfchat_init(const char *relay_server)
 
     /* Bind address */
     struct sockaddr_in addr;
-    memset(&dest_addr, 0, sizeof(addr));
+    memset(&group_addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port = htons(ARF_PORT);
@@ -102,10 +102,10 @@ arfchat_init(const char *relay_server)
         return -1;
 
     /* Set group address */
-    memset(&dest_addr, 0, sizeof(addr));
-    dest_addr.sin_family = AF_INET;
-    dest_addr.sin_addr.s_addr = inet_addr(ARF_GROUP);
-    dest_addr.sin_port = htons(ARF_PORT);
+    memset(&group_addr, 0, sizeof(addr));
+    group_addr.sin_family = AF_INET;
+    group_addr.sin_addr.s_addr = inet_addr(ARF_GROUP);
+    group_addr.sin_port = htons(ARF_PORT);
 
 
     /* If set, set relay server address */
@@ -148,6 +148,12 @@ arfchat_sendto_raw(const void *buff, size_t size, struct sockaddr_in *addr)
         sizeof(struct sockaddr_in));
 }
 
+int
+arfchat_send_raw(const void *buff, size_t size)
+{
+    return sendto(fd, buff, size, 0, (struct sockaddr*)&group_addr,
+        sizeof(struct sockaddr_in));
+}
 
 
 int
@@ -158,7 +164,7 @@ send_ping(uint32_t uid)
     header.type = TYPE_PING;
     header.s_uid = uid;
 
-    int r = sendto(fd, &header, sizeof(header), 0, (struct sockaddr*)&dest_addr,
+    int r = sendto(fd, &header, sizeof(header), 0, (struct sockaddr*)&group_addr,
             sizeof(struct sockaddr));
     if (r != 0 && relay_addr.sin_family != 0)
         r = sendto(fd, &header, sizeof(header), 0,
@@ -198,7 +204,7 @@ send_pong(uint32_t uid, uint16_t rid, const char *nick,
     }
 
     int r = sendto(fd, buff, sizeof(arf_header_t) + datalen, 0,
-            (struct sockaddr*)&dest_addr, sizeof(struct sockaddr));
+            (struct sockaddr*)&group_addr, sizeof(struct sockaddr));
     if (r != 0 && relay_addr.sin_family != 0)
         r = sendto(fd, buff, sizeof(arf_header_t) + datalen, 0,
             (struct sockaddr*)&relay_addr, sizeof(struct sockaddr));
@@ -225,7 +231,7 @@ send_join(uint32_t uid, uint16_t rid, const char *rname)
     datalen += strlen(rname) + 1;
 
     int r = sendto(fd, buff, sizeof(arf_header_t) + datalen, 0,
-            (struct sockaddr*)&dest_addr, sizeof(struct sockaddr));
+            (struct sockaddr*)&group_addr, sizeof(struct sockaddr));
     if (r != 0 && relay_addr.sin_family != 0)
         r = sendto(fd, buff, sizeof(arf_header_t) + datalen, 0,
             (struct sockaddr*)&relay_addr, sizeof(struct sockaddr));
@@ -253,7 +259,7 @@ send_rmsg(uint32_t uid, uint16_t rid, const char *msg)
     datalen += strlen(msg) + 1;
 
     int r = sendto(fd, buff, sizeof(arf_header_t) + datalen, 0,
-        (struct sockaddr*)&dest_addr, sizeof(struct sockaddr));
+        (struct sockaddr*)&group_addr, sizeof(struct sockaddr));
     if (r != 0 && relay_addr.sin_family != 0)
         r = sendto(fd, buff, sizeof(arf_header_t) + datalen, 0,
             (struct sockaddr*)&relay_addr, sizeof(struct sockaddr));

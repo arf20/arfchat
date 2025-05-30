@@ -84,7 +84,14 @@ int arfchat_recv_raw(const arf_header_t **header, const char **data,
  */
 int arfchat_sendto_raw(const void *buff, size_t size, struct sockaddr_in *addr);
 
-
+/**
+ * Send raw buffer multicast
+ *
+ * @param buff Raw message to send
+ * @param size Size of message
+ * @return Number of bytes sent or negative on error, see errno
+ */
+int arfchat_send_raw(const void *buff, size_t size);
 
 
 int send_ping(uint32_t uid);
