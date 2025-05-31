@@ -32,6 +32,10 @@ struct per_session_data {
 struct lws_protocols *proto = NULL;
 struct lws_context *context = NULL;
 
+char send_buff[LWS_PRE + ARF_BUFF_SIZE];
+char *send_block = &send_buff[LWS_PRE];
+size_t send_size = 0;
+
 
 static int
 ws_service_callback(
@@ -41,27 +45,6 @@ ws_service_callback(
     void *in,
     size_t len)
 {
-    char send_buff[LWS_PRE + ARF_BUFF_SIZE];
-    char *send_block = &send_buff[LWS_PRE];
-
-    /* handle arfchat events */
-    const arf_header_t *header;
-    const char *data;
-    struct sockaddr_in s_addr;
-    int recvsize = 0;
-    if ((recvsize = arfchat_recv_raw(&header, &data, &s_addr)) < 0) {
-        if (errno != EAGAIN) {
-            fprintf(stderr, "arfchat_recv_raw: %s\n", strerror(errno));
-            return -1;
-        }
-    } else {
-        /* relay message */
-        printf("received %d from arfchat\n", recvsize);
-        lws_callback_on_writable_all_protocol(context, proto);
-        lws_write(wsi, (char*)header, recvsize, LWS_WRITE_BINARY);
-    }
-
-
     /* handle websocket events */
     char namebuf[256];
     switch (reason) {
@@ -72,16 +55,50 @@ ws_service_callback(
         case LWS_CALLBACK_RECEIVE:
             printf("received %d from ws\n", len);
             arfchat_send_raw(in, len);
+            memcpy(send_block, in, len);
+            send_size = len;
+            lws_callback_on_writable_all_protocol(context, proto);
+        break;
+        /*case LWS_CALLBACK_BROADCAST:
+            n = libwebsocket_write(wsi, in, len, LWS_WRITE_BINARY);
+            if (n < 0) {
+                fprintf(stderr, "ERROR writing to socket");
+                return 1;
+            }
+		break;*/
+        case LWS_CALLBACK_SERVER_WRITEABLE:
+            int n = lws_write(wsi, send_block, send_size, LWS_WRITE_BINARY);
+            if (n < 0) {
+                fprintf(stderr, "ERROR writing to socket");
+                return 1;
+            }
         break;
         case LWS_CALLBACK_CLOSED:
             printf("connection closed\n");
         break;
+        /*case LWS_CALLBACK_ADD_POLL_FD:
+            pollfds[count_pollfds].fd = (int)(long)user;
+            pollfds[count_pollfds].events = (int)len;
+            pollfds[count_pollfds++].revents = 0;
+		break;
+        case LWS_CALLBACK_DEL_POLL_FD:
+            for (n = 0; n < count_pollfds; n++)
+                if (pollfds[n].fd == (int)(long)user)
+                    while (n < count_pollfds) {
+                        pollfds[n] = pollfds[n + 1];
+                        n++;
+                    }
+            count_pollfds--;
+		break;*/
         default:
             return 0;
     }
 
     return 0;
 }
+
+/*
+       */
 
 struct lws_context*
 ws_init()
@@ -119,10 +136,28 @@ ws_init()
     return context;
 }
 
-void
+int
 ws_run(struct lws_context *context)
 {
     while (1) {
+        printf("run\n");
+        const arf_header_t *header;
+        const char *data;
+        struct sockaddr_in s_addr;
+        int recvsize = 0;
+        if ((recvsize = arfchat_recv_raw(&header, &data, &s_addr)) < 0) {
+            if (errno != EAGAIN) {
+                fprintf(stderr, "arfchat_recv_raw: %s\n", strerror(errno));
+                return -1;
+            }
+        } else {
+            printf("received %d from arfchat\n", recvsize);
+            memcpy(send_block, header, recvsize);
+            send_size = recvsize;
+            lws_callback_on_writable_all_protocol(context, proto);
+        }
+
+
         lws_service(context, 1);
     }
 }

@@ -24,7 +24,7 @@
 
 struct lws_context *ws_init();
 
-void ws_run(struct lws_context *context);
+int ws_run(struct lws_context *context);
 
 #endif /* _WS_H */
 
