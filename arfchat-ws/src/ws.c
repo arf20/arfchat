@@ -158,6 +158,7 @@ ws_run(struct lws_context *context)
         }
 
 
+        /* https://github.com/warmcat/libwebsockets/issues/1735 */
         lws_service(context, -1);
 
         usleep(16000);
