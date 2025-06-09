@@ -21,8 +21,9 @@
 #include "ws.h"
 
 #include "common/config.h"
-
 #include "libarfchat/include/arfchat.h"
+
+#include <unistd.h>
 
 struct per_session_data {
     int fd;
@@ -65,7 +66,7 @@ ws_service_callback(
                 fprintf(stderr, "ERROR writing to socket");
                 return 1;
             }
-		break;*/
+        break;*/
         case LWS_CALLBACK_SERVER_WRITEABLE:
             int n = lws_write(wsi, send_block, send_size, LWS_WRITE_BINARY);
             if (n < 0) {
@@ -80,7 +81,7 @@ ws_service_callback(
             pollfds[count_pollfds].fd = (int)(long)user;
             pollfds[count_pollfds].events = (int)len;
             pollfds[count_pollfds++].revents = 0;
-		break;
+        break;
         case LWS_CALLBACK_DEL_POLL_FD:
             for (n = 0; n < count_pollfds; n++)
                 if (pollfds[n].fd == (int)(long)user)
@@ -89,7 +90,7 @@ ws_service_callback(
                         n++;
                     }
             count_pollfds--;
-		break;*/
+        break;*/
         default:
             return 0;
     }
@@ -140,7 +141,6 @@ int
 ws_run(struct lws_context *context)
 {
     while (1) {
-        printf("run\n");
         const arf_header_t *header;
         const char *data;
         struct sockaddr_in s_addr;
@@ -158,7 +158,9 @@ ws_run(struct lws_context *context)
         }
 
 
-        lws_service(context, 1);
+        lws_service(context, -1);
+
+        usleep(16000);
     }
 }
 
