@@ -1,4 +1,4 @@
-# archat
+# arfchat
 Local and LAN chat application
 
 ## Functionality
